@@ -1,11 +1,11 @@
 package gtdollar.com.test.controller;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,6 +16,8 @@ import gtdollar.com.test.contract.AddUserRequest;
 import gtdollar.com.test.contract.AddUserResponse;
 import gtdollar.com.test.contract.CheckBalanceRequest;
 import gtdollar.com.test.contract.CheckBalanceResponse;
+import gtdollar.com.test.contract.TransactionHistoryRequest;
+import gtdollar.com.test.contract.TransactionHistoryResponse;
 import gtdollar.com.test.contract.TransactionRequest;
 import gtdollar.com.test.contract.TransactionResponse;
 import gtdollar.com.test.repo.TransactionRepository;
@@ -137,6 +139,36 @@ public class UserController {
 			userRepository.save(receiver);
 		}
 		return transactionResponse;
+	}
+
+	@PostMapping(path = "/transactionHistory", consumes = "application/json", produces = "application/json") //
+	public TransactionHistoryResponse transactionHistoryResponse(
+			@RequestBody TransactionHistoryRequest transactionHistoryRequest) {
+		TransactionHistoryResponse transactionHistoryResponse = new TransactionHistoryResponse();
+		if (transactionHistoryRequest.getEmail() == null) {
+			transactionHistoryResponse.setIsSucess(false);
+			transactionHistoryResponse.setErrorMessage("Invalid Request!");
+			return transactionHistoryResponse;
+		}
+
+		User user = userRepository.findUserByEmail(transactionHistoryRequest.getEmail());
+		if (user == null) {
+			transactionHistoryResponse.setIsSucess(false);
+			transactionHistoryResponse.setErrorMessage("User Not Found!");
+			return transactionHistoryResponse;
+		}
+
+		ArrayList<Transaction> transactions = transactionRepository
+				.getTransactionsByEmail(transactionHistoryRequest.getEmail());
+		if (transactions == null) {
+			transactionHistoryResponse.setIsSucess(false);
+			transactionHistoryResponse.setErrorMessage("No Transaction Found!");
+			return transactionHistoryResponse;
+		}
+		
+		transactionHistoryResponse.setIsSucess(true);
+		transactionHistoryResponse.setTransactions(transactions);
+		return transactionHistoryResponse;
 	}
 
 }
