@@ -19,8 +19,39 @@ public class UserController {
  private UserRepository userRepository;
  
 
- @PostMapping(path = "/add", consumes = "application/json", produces = "application/json") //
+ 
+ @PostMapping(path = "/regist", consumes = "application/json", produces = "application/json") //
  public AddUserResponse addNewUser(@RequestBody AddUserRequest addUserRequest) {
+  AddUserResponse addUserResponse = new AddUserResponse();
+
+  // Validate Reuqest
+  if (addUserRequest == null || addUserRequest.getEmail() == null) {
+   addUserResponse.setSucess(false);
+   addUserResponse.setErrorMessage("Invalid Request!");
+   return addUserResponse;
+  }
+  // Query User from DB
+  User user = userRepository.findUserByEmail(addUserRequest.getEmail());
+  if (user == null) {
+   // If User not found, then create a new User
+   user = new User();
+   user.setBalance(10000);
+   user.setUserEmail(addUserRequest.getEmail());
+   userRepository.save(user);
+   
+   addUserResponse.setSucess(true);
+   addUserResponse.setBalance(10000.0);
+   
+  } else {
+   // User already registered.
+   addUserResponse.setSucess(false);
+   addUserResponse.setErrorMessage("User Already Exist!");
+  }
+  return addUserResponse;
+ }
+ 
+ @PostMapping(path = "/check", consumes = "application/json", produces = "application/json") //
+ public AddUserResponse checkBalance(@RequestBody AddUserRequest addUserRequest) {
   AddUserResponse addUserResponse = new AddUserResponse();
 
   // Validate Reuqest
