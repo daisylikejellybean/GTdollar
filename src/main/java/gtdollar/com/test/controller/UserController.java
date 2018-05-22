@@ -145,7 +145,7 @@ public class UserController {
 	public TransactionHistoryResponse transactionHistoryResponse(
 			@RequestBody TransactionHistoryRequest transactionHistoryRequest) {
 		TransactionHistoryResponse transactionHistoryResponse = new TransactionHistoryResponse();
-		if (transactionHistoryRequest.getEmail() == null) {
+		if (transactionHistoryRequest == null || transactionHistoryRequest.getEmail() == null) {
 			transactionHistoryResponse.setIsSucess(false);
 			transactionHistoryResponse.setErrorMessage("Invalid Request!");
 			return transactionHistoryResponse;
@@ -160,12 +160,12 @@ public class UserController {
 
 		ArrayList<Transaction> transactions = transactionRepository
 				.getTransactionsByEmail(transactionHistoryRequest.getEmail());
-		if (transactions == null) {
+		if (transactions == null || transactions.size() == 0) {
 			transactionHistoryResponse.setIsSucess(false);
 			transactionHistoryResponse.setErrorMessage("No Transaction Found!");
 			return transactionHistoryResponse;
 		}
-		
+
 		transactionHistoryResponse.setIsSucess(true);
 		transactionHistoryResponse.setTransactions(transactions);
 		return transactionHistoryResponse;
